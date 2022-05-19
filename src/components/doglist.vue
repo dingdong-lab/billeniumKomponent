@@ -1,7 +1,8 @@
 <template>
 	<div id='doglist' class='doglists'>
-	  <div v-for='dog in dogs' class='dogselem'>
-		 <div><img v-bind:src='dog.image'></div>
+	<div v-if='error'>Cos poszlo nie tak</div>
+	  <div v-for='dog in dogs' :key="dogs.id" class='dogselem'>
+		 <div><img src='https://www.zooplus.pl/magazyn/wp-content/uploads/2021/04/dog-niemiecki-768x512.jpg'></div>
 		 <ul class='doginfo'>
 		   <li><div>{{dog.name}}</div></li>
 		   <li><div v-if='!dog.descState'>
@@ -12,44 +13,46 @@
 			 {{showFullDesc(dog)}}
 			 <button v-on:click='changeDescState(dog)'>Mniej</button>
 		   </div></li>
-		   <li><div>{{dog.prohibiton}}</div></li>
-		   <li><div>{{dog.advice}}</div></li>
+		   <li><div>{{dog.username}}</div></li>
+		   <li><div>{{dog.email}}</div></li>
 		 </ul>
 	  </div>
+	  <button v-on:click='loadData()'>Zaladuj</button>
 	</div>
 </template>
 
 <script>
+	import axios from 'axios';
+	
 	export default {
 	data() {
 		return {
-			dogs: [
-			{name: 'Dog niemiecki', 
-			image: 'https://www.zooplus.pl/magazyn/wp-content/uploads/2021/04/dog-niemiecki-768x512.jpg',
-			desc: 'Fajny pies niemiecki, ale jest agresywny, mocno gryzie ;/',
-			prohibiton: 'Trzymać z dala od dzieci',
-			advice: 'Dużo głaskać',
-			descState: false
-			},
-			{name: 'Labrador', 
-			image: 'https://zwierzaki.pl/wp-content/uploads/2021/08/labrador-retriever-1200x900.jpg',
-			desc: 'Bardzo fajny i przyjemny piesek, nie można się przyczepić.',
-			prohibiton: 'Ma alergię na karmę z wołowiną',
-			advice: 'Dużo głaskać',
-			descState: false
-			}
-		  ]
+			dogs: [],
+			error: false
 		}
 	  },
 	 methods: {
 		showLimitedDesc(dog) {
-			return dog.desc.substr(0, 50)+'...'
+			var info = dog.address['street']+' '+dog.address['suite']+' '+dog.address['city']+' '+dog.address['zipcode'];
+			return info.substr(0, 50)+'...';
 		},
 		showFullDesc(dog) {
-			return dog.desc
+			var info = dog.address['street']+' '+dog.address['suite']+' '+dog.address['city']+' '+dog.address['zipcode'];
+			return info;
 		},
 		changeDescState(dog) {
-			dog.descState = !dog.descState
+			dog.descState = !dog.descState;
+		},
+		async loadData() {
+			let temp = null;
+			axios.get("https://jsonplaceholder.typicode.com/users/")
+			.then(result => { 
+				this.dogs = result.data;
+			})
+			.catch(error => {
+				this.error = true;
+				alert(error);
+			});
 		}
 	  }
 	}
